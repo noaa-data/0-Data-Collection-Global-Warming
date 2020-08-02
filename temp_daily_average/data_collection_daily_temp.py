@@ -77,11 +77,11 @@ if __name__ == '__main__':
     print(year)
     url = f'https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/{year}'
     cloud_set = query_cloud_csvs(url, year)
-    print(len(cloud_set))
+    print('cloud set for year:', len(cloud_set))
     local_set = query_local_csvs(year)
-    print(len(local_set))
+    print('local set for year:', len(local_set))
     diff_set = query_diff_local_cloud(local_set, cloud_set)
-    print(diff_set)
+    print('diff set for year:', len(diff_set))
     if len(diff_set) > 0:
         download_new_csvs(url, year, diff_set)
     else:
