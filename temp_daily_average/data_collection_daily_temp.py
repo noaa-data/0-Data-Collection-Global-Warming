@@ -87,7 +87,7 @@ def download_new_csvs(url: str, year: int, diff_set: set, data_dir: str) -> bool
                 except requests.exceptions.InvalidURL:
                     print('Bad url', i)
             count += 1
-        if count <= 1000:
+        if count <= 2000:
             return True
     elif year == 0:
         return True
