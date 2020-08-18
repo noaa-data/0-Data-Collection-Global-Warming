@@ -117,6 +117,13 @@ def find_new_year(next_year: bool, year: int, data_dir: str):
     print('STATUS => current year not finished.')
 
 
+@task(log_stdout=True)
+def compare_folder_dates(diff_set: int):
+    if not diff_set:
+        pass
+
+
+
 schedule = IntervalSchedule(interval=timedelta(minutes=30))
 
 
