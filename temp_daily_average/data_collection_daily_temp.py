@@ -30,8 +30,8 @@ def find_highest_year(url: str, data_dir):
 
 
 @task
-def build_url(year):
-    return f'https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/{year}'
+def build_url(base_url, year=''):
+    return f'{base_url}/{year}'
 
 
 @task
@@ -94,9 +94,9 @@ def download_new_csvs(url: str, year: int, diff_set: set, data_dir: str) -> bool
 
 
 @task(log_stdout=True)
-def find_new_year(next_year: bool, year: int, data_dir: str):
+def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
     if next_year:
-        url = 'https://www.ncei.noaa.gov/data/global-summary-of-the-day/access'
+        #url = 'https://www.ncei.noaa.gov/data/global-summary-of-the-day/access'
         response = requests.get(url)
         parsed_html = BS(response.content, 'html.parser')
         cloud_year_set = set()
@@ -117,12 +117,6 @@ def find_new_year(next_year: bool, year: int, data_dir: str):
     print('STATUS => current year not finished.')
 
 
-@task(log_stdout=True)
-def compare_folder_dates(diff_set: int):
-    if not diff_set:
-        pass
-
-
 
 schedule = IntervalSchedule(interval=timedelta(minutes=30))
 
@@ -132,13 +126,13 @@ with Flow('NOAA Daily Average Temp Records', schedule) as flow:
     data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
 
     t1_year = find_highest_year(url=base_url, data_dir=data_dir)
-    t2_url  = build_url(year=t1_year)
+    t2_url  = build_url(base_url=base_url, year=t1_year)
     t3_cset = query_cloud_csvs(url=t2_url, year=t1_year)
     t4_lset = query_local_csvs(year=t1_year, data_dir=data_dir)
     t5_dset = query_diff_local_cloud(local_set=t4_lset, cloud_set=t3_cset)
     t6_next = download_new_csvs(url=t2_url, year=t1_year, diff_set=t5_dset, data_dir=data_dir)
     #t7_task = 
-    find_new_year(next_year=t6_next, year=t1_year, data_dir=data_dir)
+    find_new_year(url=base_url, next_year=t6_next, year=t1_year, data_dir=data_dir)
 
 
 #flow.run()
