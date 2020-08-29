@@ -117,7 +117,6 @@ def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
     print('STATUS => current year not finished.')
 
 
-
 schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
 
 
