@@ -2,3 +2,4 @@ venv
 dev_venv
 __pycache__
 .vscode
+.ipynb_checkpoints

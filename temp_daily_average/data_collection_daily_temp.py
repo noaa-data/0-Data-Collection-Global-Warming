@@ -56,7 +56,7 @@ def query_local_csvs(year: int, data_dir: str) -> set:
     return csv_local_set
 
 
-@task(log_stdout=True)
+@task(log_stdout=True) # pylint: disable=no-value-for-parameter
 def query_diff_local_cloud(local_set: set, cloud_set: set) -> set:
     diff_set = cloud_set.difference(local_set)
     if diff_set:
@@ -66,7 +66,7 @@ def query_diff_local_cloud(local_set: set, cloud_set: set) -> set:
     return diff_set
 
 
-@task(log_stdout=True)
+@task(log_stdout=True) # pylint: disable=no-value-for-parameter
 def download_new_csvs(url: str, year: int, diff_set: set, data_dir: str) -> bool:
     if int(year) > 0:
         count = 0
@@ -118,7 +118,7 @@ def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
 
 
 
-schedule = IntervalSchedule(interval=timedelta(minutes=30))
+schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
 
 
 with Flow('NOAA Daily Average Temp Records', schedule) as flow:
@@ -135,5 +135,5 @@ with Flow('NOAA Daily Average Temp Records', schedule) as flow:
     find_new_year(url=base_url, next_year=t6_next, year=t1_year, data_dir=data_dir)
 
 
-#flow.run()
-flow.register(project_name="Global Warming Data")
+flow.run()
+#flow.register(project_name="Global Warming Data")
