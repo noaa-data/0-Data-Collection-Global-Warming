@@ -111,6 +111,6 @@ with Flow('NOAA Daily Avg Current Year', schedule) as flow:
 
 
 if os.environ.get('TEST_PREFECT') == 'True':
-    flow.runt()
+    flow.run()
 else:
     flow.register(project_name="Global Warming Data")
