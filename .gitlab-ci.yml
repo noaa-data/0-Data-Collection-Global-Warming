@@ -5,4 +5,5 @@ before_script:
   - export TEST_PREFECT=True
 
 run:
-  - python3 temp_daily_average/update_current_year.py
+  script:
+    - python3 temp_daily_average/update_current_year.py
