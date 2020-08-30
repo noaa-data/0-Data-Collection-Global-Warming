@@ -94,9 +94,9 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
 
 print(type(os.environ.get('TEST_PREFECT')))
 if os.environ.get('TEST_PREFECT') == 'True':
-    schedule = IntervalSchedule(interval=timedelta(minutes=45))
-else:
     schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
+else:
+    schedule = IntervalSchedule(interval=timedelta(minutes=45))
 
 with Flow('NOAA Daily Avg Current Year', schedule) as flow:
     year = Parameter('year', default=date.today().year)
