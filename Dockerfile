@@ -8,5 +8,5 @@ WORKDIR /home/app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-ENV TEST_PREFECT "True"
+#ENV TEST_PREFECT "True"
 CMD ["python"]
