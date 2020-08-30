@@ -92,9 +92,10 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
     if count <= 2000:
         return True
 
-
-schedule = IntervalSchedule(interval=timedelta(minutes=45))
-
+if os.environ.get('TEST_PREFECT') == 'True':
+    schedule = IntervalSchedule(interval=timedelta(minutes=45))
+else:
+    schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
 
 with Flow('NOAA Daily Avg Current Year', schedule) as flow:
     year = Parameter('year', default=date.today().year)
