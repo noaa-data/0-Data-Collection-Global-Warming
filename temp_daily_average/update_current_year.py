@@ -42,10 +42,11 @@ def cloud_csvs_and_timestamps(url: str) -> pd.DataFrame:
 @task(log_stdout=True) # pylint: disable=no-value-for-parameter
 def local_csvs_and_timestamps(data_dir: str, year: str) -> pd.DataFrame:
     local_list = []
-    dir_path = Path(data_dir) / year
+    dir_path = Path(data_dir) / str(year)
+    print(dir_path)
     for file_name in os.listdir(dir_path):
         date = os.stat(os.path.join(dir_path, file_name)).st_ctime
-        local_list.append(('local', file_name, str(datetime.datetime.fromtimestamp(date))))
+        local_list.append(('local', file_name, str(datetime.fromtimestamp(date))))
     return pd.DataFrame(local_list, columns = ['type', 'filename', 'local_date'])
 
 
@@ -82,7 +83,7 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
                 download_url = url + '/' + i
                 print(download_url)
                 result = requests.get(download_url)
-                file_path = Path(data_dir / year / i)
+                file_path = Path(data_dir) / str(year) / i
                 open(file_path, 'wb').write(result.content)
                 #print(result.content)
             except requests.exceptions.InvalidURL:
@@ -92,29 +93,22 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
         return True
 
 
-schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
+schedule = IntervalSchedule(interval=timedelta(minutes=45))
 
 
-with Flow('NOAA Daily Average Temp Records', schedule) as flow:
+with Flow('NOAA Daily Avg Current Year', schedule) as flow:
     year = Parameter('year', default=date.today().year)
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
     data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
 
-    t1_url  = build_url(base_url=base_url, year=t1_year)
+    t1_url  = build_url(base_url=base_url, year=year)
     t2_cloud = cloud_csvs_and_timestamps(url=t1_url)
     t3_local = local_csvs_and_timestamps(data_dir=data_dir, year=year)
     t4_new = find_difference(cloud_df=t2_cloud, local_df=t3_local)
     t5_updates = find_updated_files(cloud_df=t2_cloud, local_df=t3_local)
     t6_dwnload = combine_and_return_set(new_df=t4_new, updated_df=t5_updates)
-    t7_task = download_new_csvs(url=t1_url, year=year, diff_set=t6_download, data_dir=data_dir)
-
-    # t3_cset = query_cloud_csvs(url=t2_url, year=t1_year)
-    # t4_lset = query_local_csvs(year=t1_year, data_dir=data_dir)
-    # t5_dset = query_diff_local_cloud(local_set=t4_lset, cloud_set=t3_cset)
-    # t6_next = download_new_csvs(url=t2_url, year=t1_year, diff_set=t5_dset, data_dir=data_dir)
-    # #t7_task = 
-    # find_new_year(url=base_url, next_year=t6_next, year=t1_year, data_dir=data_dir)
+    t7_task = download_new_csvs(url=t1_url, year=year, diff_set=t6_dwnload, data_dir=data_dir)
 
 
-flow.run()
-#flow.register(project_name="Global Warming Data")
+#flow.run()
+flow.register(project_name="Global Warming Data")
