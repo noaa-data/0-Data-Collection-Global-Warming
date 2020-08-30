@@ -93,7 +93,7 @@ def download_new_csvs(url: str, year: int, diff_set: set, data_dir: str) -> bool
         return True
 
 
-@task(log_stdout=True)
+@task(log_stdout=True) # pylint: disable=no-value-for-parameter
 def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
     if next_year:
         #url = 'https://www.ncei.noaa.gov/data/global-summary-of-the-day/access'
@@ -113,6 +113,7 @@ def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
                 if os.path.exists(download_path) == False:
                     Path(download_path).mkdir(parents=True, exist_ok=True)
                 print('STATUS => new year:', year)
+            else:
                 return year
     print('STATUS => current year not finished.')
 
@@ -131,8 +132,7 @@ with Flow('NOAA Daily Average Temp Records', schedule) as flow:
     t4_lset = query_local_csvs(year=t1_year, data_dir=data_dir)
     t5_dset = query_diff_local_cloud(local_set=t4_lset, cloud_set=t3_cset)
     t6_next = download_new_csvs(url=t2_url, year=t1_year, diff_set=t5_dset, data_dir=data_dir)
-    #t7_task = 
-    find_new_year(url=base_url, next_year=t6_next, year=t1_year, data_dir=data_dir)
+    t7_task = find_new_year(url=base_url, next_year=t6_next, year=t1_year, data_dir=data_dir)
 
 
 flow.run()
