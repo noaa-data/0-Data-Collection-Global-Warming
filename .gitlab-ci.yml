@@ -1,0 +1,8 @@
+image: "python:3.7-buster"
+
+before_script:
+  - sudo python3 -m pip install requirements.txt
+  - export TEST_PREFECT=True
+
+run:
+  - python3 temp_daily_average/update_current_year.py
