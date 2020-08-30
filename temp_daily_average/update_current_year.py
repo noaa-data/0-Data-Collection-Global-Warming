@@ -110,7 +110,7 @@ with Flow('NOAA Daily Avg Current Year', schedule) as flow:
     t7_task = download_new_csvs(url=t1_url, year=year, diff_set=t6_dwnload, data_dir=data_dir)
 
 
-if os.envron.get('TEST_PREFECT') == 'True':
+if os.environ.get('TEST_PREFECT') == 'True':
     flow.runt()
 else:
     flow.register(project_name="Global Warming Data")
