@@ -1,6 +1,7 @@
 image: "python:3.7-buster"
 
 before_script:
+  - python3 pip install --upgrade pip
   - python3 -m pip install -r requirements.txt
   - python3 -m pip install pandas
   - export TEST_PREFECT=True
