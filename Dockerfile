@@ -7,4 +7,6 @@ ENV PYTHONPATH "${PYTHONPATH}:/home/app"
 WORKDIR /home/app
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+
+ENV TEST_PREFECT "True"
 CMD ["python"]
