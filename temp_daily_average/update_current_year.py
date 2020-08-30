@@ -92,6 +92,7 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
     if count <= 2000:
         return True
 
+print(type(os.environ.get('TEST_PREFECT')))
 if os.environ.get('TEST_PREFECT') == 'True':
     schedule = IntervalSchedule(interval=timedelta(minutes=45))
 else:
