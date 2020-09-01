@@ -78,7 +78,7 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
         Path(download_path).mkdir(parents=True, exist_ok=True)
 
     for i in diff_set:
-        if count <= 1000:
+        if count <= 2000:
             try:
                 download_url = url + '/' + i
                 print(download_url)
@@ -92,13 +92,12 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
     if count <= 2000:
         return True
 
-print(type(os.environ.get('TEST_PREFECT')))
 if os.environ.get('TEST_PREFECT') == 'True':
-    schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
+    schedule = None#IntervalSchedule(interval=timedelta(minutes=0.1))
 else:
     schedule = IntervalSchedule(interval=timedelta(minutes=45))
 
-with Flow('NOAA Daily Avg Current Year', schedule) as flow:
+with Flow('NOAA Daily Avg Current Year', schedule=schedule) as flow:
     year = Parameter('year', default=date.today().year)
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
     data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
