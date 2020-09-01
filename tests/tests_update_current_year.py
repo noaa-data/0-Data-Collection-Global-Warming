@@ -1,20 +1,22 @@
 from pathlib import Path
 from datetime import date
+import pprint
 
-import update_current_year_test as current
+from update_current_year_test import flow, build_url
 
 import prefect
 from prefect import Flow, Parameter, Task
 
-#year = Parameter('year', default=date.today().year)
-base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
-data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
 
+print(flow.tasks)
 
-#state = current.flow.run()
+#state = build_url(base_url, year).run()
 
-assert len(current.flow.tasks) == 10
-assert current.result[build_url] in current.flow.tasks
+assert len(flow.tasks) == 10
+print(type(flow.tasks))
+print(type(build_url))
+print(str(build_url))
+
 
 #print(state.result['find_updated_files'])
 
@@ -38,4 +40,4 @@ assert current.result[build_url] in current.flow.tasks
 #assert t1_url in flow.tasks()
 
 #def test_build_url_success():
-#assert current.build_url(base_url, year).run() == base_url + str(year)
+#assert current.build_url(base_url, year).run() == base_url + str(year)``
