@@ -1,23 +1,22 @@
 from pathlib import Path
 from datetime import date
 
-import update_current_year as current
+import update_current_year_test as current
 
 import prefect
 from prefect import Flow, Parameter, Task
-from prefect import Parameter
 
 #year = Parameter('year', default=date.today().year)
 base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
 data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
 
-def test_tests():
 
-pre_state = current.flow
+#state = current.flow.run()
 
+assert len(current.flow.tasks) == 10
+assert current.result[build_url] in current.flow.tasks
 
-
-def test_tasks():
+#print(state.result['find_updated_files'])
 
 
 #print(current.build_url(base_url, year).run())
