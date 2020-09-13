@@ -70,7 +70,7 @@ def combine_and_return_set(new_df, updated_df) -> set:
 
 
 @task(log_stdout=True) # pylint: disable=no-value-for-parameter
-def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool:
+def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str, dwnld_count: int) -> bool:
     count = 0
     data_dir = Path(data_dir)
     download_path = data_dir / str(year) #Path('data') / str(year)
@@ -78,7 +78,7 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
         Path(download_path).mkdir(parents=True, exist_ok=True)
 
     for i in diff_set:
-        if count <= 2000:
+        if count <= dwnld_count:
             try:
                 download_url = url + '/' + i
                 print(download_url)
@@ -89,10 +89,10 @@ def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str) -> bool
             except requests.exceptions.InvalidURL:
                 print('Bad url', i)
         count += 1
-    if count <= 2000:
+    if count <= dwnld_count:
         return True
 
-if os.environ.get('TEST_PREFECT') == 'True':
+if os.environ.get('PREFECT_ENV') == 'test':
     schedule = None#IntervalSchedule(interval=timedelta(minutes=0.1))
 else:
     schedule = IntervalSchedule(interval=timedelta(minutes=45))
@@ -101,6 +101,7 @@ with Flow('NOAA Daily Avg Current Year', schedule=schedule) as flow:
     year = Parameter('year', default=date.today().year)
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
     data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    dwnld_count = Parameter('dwnld_count', default=int(os.environ.get('PREFECT_COUNT')) or 2000)
 
     t1_url  = build_url(base_url=base_url, year=year)
     t2_cloud = cloud_csvs_and_timestamps(url=t1_url)
@@ -108,10 +109,10 @@ with Flow('NOAA Daily Avg Current Year', schedule=schedule) as flow:
     t4_new = find_difference(cloud_df=t2_cloud, local_df=t3_local)
     t5_updates = find_updated_files(cloud_df=t2_cloud, local_df=t3_local)
     t6_dwnload = combine_and_return_set(new_df=t4_new, updated_df=t5_updates)
-    t7_task = download_new_csvs(url=t1_url, year=year, diff_set=t6_dwnload, data_dir=data_dir)
+    t7_task = download_new_csvs(url=t1_url, year=year, diff_set=t6_dwnload, data_dir=data_dir, dwnld_count=dwnld_count)
 
 
-if os.environ.get('TEST_PREFECT') == 'True':
+if os.environ.get('PREFECT_ENV') in ('local', 'test'):
     flow.run()
 else:
     flow.register(project_name="Global Warming Data")
