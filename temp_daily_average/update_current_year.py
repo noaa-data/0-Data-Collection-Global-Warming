@@ -71,6 +71,7 @@ def combine_and_return_set(new_df, updated_df) -> set:
 
 @task(log_stdout=True) # pylint: disable=no-value-for-parameter
 def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str, dwnld_count: int) -> bool:
+    dwnld_count = int(dwnld_count)
     count = 0
     data_dir = Path(data_dir)
     download_path = data_dir / str(year) #Path('data') / str(year)
@@ -101,7 +102,7 @@ with Flow('NOAA Daily Avg Current Year', schedule=schedule) as flow:
     year = Parameter('year', default=date.today().year)
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
     data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
-    dwnld_count = Parameter('dwnld_count', default=int(os.environ.get('PREFECT_COUNT')) or 2000)
+    dwnld_count = Parameter('dwnld_count', default=os.environ.get('PREFECT_COUNT') or 2000)
 
     t1_url  = build_url(base_url=base_url, year=year)
     t2_cloud = cloud_csvs_and_timestamps(url=t1_url)
