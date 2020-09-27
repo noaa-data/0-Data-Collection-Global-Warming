@@ -4,7 +4,7 @@ image: "global-warming-data:0.4"
 stages:
   - test
   - deploy
-  - rollback
+  # - rollback
 
 before_script:
   - python3 -m pip install --upgrade pip
@@ -26,10 +26,10 @@ deploy_preduction:
   only:
     - master
 
-rollback_production:
-  stage: rollback
-  script:
-    - python3 temp_daily_average/update_current_year.py
-  when: manual
-  only:
-    - master
+# rollback_production:
+#   stage: rollback
+#   script:
+#     - python3 temp_daily_average/update_current_year.py
+#   when: manual
+#   only:
+#     - master
