@@ -1,6 +1,10 @@
 #image: "python:3.7-buster"
 image: "global-warming-data:0.4"
 
+stages:
+  - test
+  - deploy
+
 before_script:
   - python3 -m pip install --upgrade pip
   - python3 -m pip install -r requirements.txt
@@ -15,7 +19,7 @@ run_tests:
 
 deploy_preduction:
   stage: deploy
-  #script:
+  script:
   when: manual
   only:
     - master
