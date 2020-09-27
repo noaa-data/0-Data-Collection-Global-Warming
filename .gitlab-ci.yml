@@ -20,6 +20,7 @@ run_tests:
 deploy_preduction:
   stage: deploy
   script:
+    - python3 temp_daily_average/update_current_year.py
   when: manual
   only:
     - master
