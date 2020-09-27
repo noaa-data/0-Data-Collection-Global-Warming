@@ -15,12 +15,19 @@ before_script:
 
 run_tests:
   stage: test
+  tags:
+    - docker
   script:
     - python3 temp_daily_average/update_current_year.py
 
 deploy_preduction:
   stage: deploy
+  tags:
+    - shell
   script:
+    - cd /home/pi/github/Data-Collection-Global-Warming
+    - git pull
+    - source venv\bin\activate
     - python3 temp_daily_average/update_current_year.py
   when: manual
   only:
