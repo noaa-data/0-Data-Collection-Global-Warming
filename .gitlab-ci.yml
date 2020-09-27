@@ -9,7 +9,7 @@ stages:
 before_script:
   - python3 -m pip install --upgrade pip
   - python3 -m pip install -r requirements.txt
-  #- python3 -m pip install pandas 1
+  #- python3 -m pip install pandas 
   - export PREFECT_ENV=local
   - export PREFECT_ENV=test
 
