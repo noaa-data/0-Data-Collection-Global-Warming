@@ -101,7 +101,7 @@ else:
 with Flow('NOAA Daily Avg Current Year', schedule=schedule) as flow:
     year = Parameter('year', default=date.today().year)
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
-    data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/Ben/Documents/working_datasets/noaa_global_temps')))#default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
     dwnld_count = Parameter('dwnld_count', default=os.environ.get('PREFECT_COUNT') or 10000)
 
     t1_url  = build_url(base_url=base_url, year=year)

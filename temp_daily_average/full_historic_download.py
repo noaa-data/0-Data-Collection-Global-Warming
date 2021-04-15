@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from pprint import pprint
 import os
+import re
 
 # PyPI
 from bs4 import BeautifulSoup as BS
@@ -20,6 +21,7 @@ import requests
 def find_highest_year(url: str, data_dir):
     #data_dir = Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'
     year_folders = os.listdir(path=data_dir)
+    print(year_folders)
     if year_folders:
         return max(year_folders)
     else:
@@ -69,12 +71,13 @@ def query_diff_local_cloud(local_set: set, cloud_set: set) -> set:
 @task(log_stdout=True) # pylint: disable=no-value-for-parameter
 def download_new_csvs(url: str, year: int, diff_set: set, data_dir: str) -> bool:
     if int(year) > 0:
+        # print('YES')
         count = 0
         data_dir = Path(data_dir)
         download_path = data_dir / str(year) #Path('data') / str(year)
         if os.path.exists(download_path) == False:
             Path(download_path).mkdir(parents=True, exist_ok=True)
-
+        # print(diff_set)
         for i in diff_set:
             if count <= 1000:
                 try:
@@ -90,6 +93,7 @@ def download_new_csvs(url: str, year: int, diff_set: set, data_dir: str) -> bool
         if count <= 2000:
             return True
     elif year == 0:
+        # print('NO')
         return True
 
 
@@ -101,11 +105,16 @@ def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
         parsed_html = BS(response.content, 'html.parser')
         cloud_year_set = set()
         for item in parsed_html.find_all('a'):
+            #print(item)
             #if item.get_text().endswith('/'):
             cloud_year = item.get_text().replace('/', '')
             cloud_year_set.add(cloud_year)
-        cloud_year_set = sorted(cloud_year_set)
+        print(cloud_year_set)
+        cloud_year_set = [x for x in cloud_year_set if re.search(r'\d\d\d\d', x)]
+        cloud_year_set = sorted(cloud_year_set, reverse=True)
+        print(cloud_year_set)
         for i in cloud_year_set:
+            # print(i)
             if int(i) > int(year):
                 year = i
                 data_dir = Path(data_dir)
@@ -123,7 +132,7 @@ schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
 
 with Flow('NOAA Daily Average Temp Records', schedule) as flow:
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
-    data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/Ben/Documents/working_datasets/noaa_global_temps')))#str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
 
     t1_year = find_highest_year(url=base_url, data_dir=data_dir)
     t2_url  = build_url(base_url=base_url, year=t1_year)
