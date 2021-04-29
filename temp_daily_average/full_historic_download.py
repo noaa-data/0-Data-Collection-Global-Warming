@@ -31,12 +31,12 @@ def find_highest_year(url: str, data_dir):
     raise SKIP
 
 
-@task
+@task(log_stdout=True)
 def build_url(base_url, year=''):
     return f'{base_url}/{year}'
 
 
-@task
+@task(log_stdout=True)
 def query_cloud_csvs(url: str, year: int) -> set:
     response = requests.get(url)
     parsed_html = BS(response.content, 'html.parser')
@@ -47,7 +47,7 @@ def query_cloud_csvs(url: str, year: int) -> set:
     return csv_cloud_set
 
 
-@task
+@task(log_stdout=True)
 def query_local_csvs(year: int, data_dir: str) -> set:
     csv_local_set = set()
     data_dir = Path(data_dir)
@@ -113,17 +113,21 @@ def find_new_year(url: str, next_year: bool, year: int, data_dir: str):
         cloud_year_set = [x for x in cloud_year_set if re.search(r'\d\d\d\d', x)]
         cloud_year_set = sorted(cloud_year_set, reverse=True)
         print(cloud_year_set)
-        for i in cloud_year_set:
-            # print(i)
-            if int(i) > int(year):
-                year = i
-                data_dir = Path(data_dir)
-                download_path = data_dir / str(year) #Path('data') / str(year)
-                if os.path.exists(download_path) == False:
-                    Path(download_path).mkdir(parents=True, exist_ok=True)
-                print('STATUS => new year:', year)
-            else:
-                return year
+        print(year)
+        if year == 0:
+            year = cloud_year_set[-1]
+        else:
+            for i in sorted(cloud_year_set):
+                # print(i)
+                if int(i) > int(year):
+                    year = i
+                    break
+        data_dir = Path(data_dir)
+        download_path = data_dir / str(year) #Path('data') / str(year)
+        if os.path.exists(download_path) == False:
+            Path(download_path).mkdir(parents=True, exist_ok=True)
+        print('STATUS => new year:', year)
+        return year
     print('STATUS => current year not finished.')
 
 
@@ -132,7 +136,8 @@ schedule = IntervalSchedule(interval=timedelta(minutes=0.1))
 
 with Flow('NOAA Daily Average Temp Records', schedule) as flow:
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
-    data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/Ben/Documents/working_datasets/noaa_global_temps')))#str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    # data_dir = Parameter('data_dir', default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/benha/data_downloads/noaa_global_temps')))
 
     t1_year = find_highest_year(url=base_url, data_dir=data_dir)
     t2_url  = build_url(base_url=base_url, year=t1_year)

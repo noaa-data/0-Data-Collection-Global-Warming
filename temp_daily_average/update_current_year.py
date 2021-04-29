@@ -18,12 +18,12 @@ import requests
 import pandas as pd
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def build_url(base_url, year=''):
     return f'{base_url}/{year}'
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def cloud_csvs_and_timestamps(url: str) -> pd.DataFrame:
     cloud_list = []
     filename, date = None, None
@@ -39,7 +39,7 @@ def cloud_csvs_and_timestamps(url: str) -> pd.DataFrame:
     return pd.DataFrame(cloud_list, columns = ['type', 'filename', 'cloud_date'])
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def local_csvs_and_timestamps(data_dir: str, year: str) -> pd.DataFrame:
     local_list = []
     dir_path = Path(data_dir) / str(year)
@@ -50,12 +50,12 @@ def local_csvs_and_timestamps(data_dir: str, year: str) -> pd.DataFrame:
     return pd.DataFrame(local_list, columns = ['type', 'filename', 'local_date'])
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def find_difference(cloud_df, local_df) -> pd.DataFrame:
     return pd.concat([local_df, cloud_df]).drop_duplicates(subset = ['filename'], keep=False)
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def find_updated_files(cloud_df, local_df) -> pd.DataFrame:
     file_df = pd.DataFrame(columns = ['type', 'filename', 'cloud_date'])
     file_df = file_df.append(cloud_df)
@@ -63,13 +63,13 @@ def find_updated_files(cloud_df, local_df) -> pd.DataFrame:
     return file_df[(file_df['cloud_date'] > file_df['local_date'])]
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def combine_and_return_set(new_df, updated_df) -> set:
     download_df = updated_df.append(new_df)
     return set(download_df['filename'].to_list())
 
 
-@task(log_stdout=True) # pylint: disable=no-value-for-parameter
+@task(log_stdout=True)
 def download_new_csvs(url: str, year: str, diff_set: set, data_dir: str, dwnld_count: int) -> bool:
     dwnld_count = int(dwnld_count)
     count = 0
@@ -101,7 +101,8 @@ else:
 with Flow('NOAA Daily Avg Current Year', schedule=schedule) as flow:
     year = Parameter('year', default=date.today().year)
     base_url = Parameter('base_url', default='https://www.ncei.noaa.gov/data/global-summary-of-the-day/access/')
-    data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/Ben/Documents/working_datasets/noaa_global_temps')))#default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    # data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/Ben/Documents/working_datasets/noaa_global_temps')))#default=str(Path.home() / 'data_downloads' / 'noaa_daily_avg_temps'))
+    data_dir = Parameter('data_dir', default=str(Path('/mnt/c/Users/benha/data_downloads/noaa_global_temps')))
     dwnld_count = Parameter('dwnld_count', default=os.environ.get('PREFECT_COUNT') or 10000)
 
     t1_url  = build_url(base_url=base_url, year=year)
