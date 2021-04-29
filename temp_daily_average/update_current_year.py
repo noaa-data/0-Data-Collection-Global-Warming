@@ -10,7 +10,7 @@ from datetime import datetime
 from datetime import date
 from pathlib import Path
 from pprint import pprint
-import os
+import os, re
 
 # PyPI
 from bs4 import BeautifulSoup as BS
